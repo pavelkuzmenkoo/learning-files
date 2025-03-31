@@ -1,0 +1,123 @@
+День 1
+
+tcx комилирует файлы .ts в .js
+
+По умолчанию TypeScript нацелен на ES5, чрезвычайно старую версию ECMAScript. 
+но мы можем изменить это с помощью --target опции. --target es2015 изменит TypeScript для таргетинга на ECMAScript 2015, что означает, что код должен быть способен работать везде, где поддерживается ECMAScript 2015.
+
+TypeScript имеет несколько флагов строгости проверки типов, которые можно включать и выключать.
+вот основные флаги которые нужно знать 
+
+noImplicitAny
+Включение noImplicitAnyфлага выдаст ошибку для любых переменных, тип которых неявно выведен как any.
+
+strictNullChecks
+Включает строгую проверку null и undefined.
+
+strict
+Включает все строгие проверки.
+
+День 2
+Типы и интерфейсы
+Интерфейсы с одинаковыми именами объединяются
+
+type Point = {
+  x: number;
+  y: number;
+};
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+Типы можно пересекать и объединять, интерфейсы – наследовать
+Пересечение типов осуществляется с помощью оператора &:
+
+
+    type User = { id: string; };
+    type Article = { title: string; };
+
+    type UserArticle = User & Article;
+
+Для интерфейсов наследование осуществляется с помощью ключевого слова extends:
+
+    interface User {
+        id: string;
+    }
+
+    interface Article {
+        title: string;
+    }
+
+    interface UserArticle extends User, Article {}
+
+День 3
+Narrowing - уточнение типа, чтобы избежать ошибок нужно добавлять проверки на типы с помощью typeof, instanceof, in, это поможет обработать все возможные варианты, вот несколько примеров:
+
+    function padLeft(padding: number | string, input: string): string {
+        if (typeof padding === "number") {
+            return " ".repeat(padding) + input;
+        }
+        
+        return padding + input;
+    }
+
+    function example(x: string | number, y: string | boolean) {
+        if (x === y) {
+            // We can now call any 'string' method on 'x' or 'y'.
+            x.toUpperCase();
+            y.toLowerCase();
+            //(method) String.toLowerCase(): string
+        } else {
+            console.log(x);
+            //(parameter) x: string | number
+            console.log(y);
+            //(parameter) y: string | boolean
+        }
+    }
+
+    function logValue(x: Date | string) {
+        if (x instanceof Date) {
+            console.log(x.toUTCString());
+            //(parameter) x: Date
+        } else {
+            console.log(x.toUpperCase());
+            //(parameter) x: string
+        }
+    }
+
+    type Fish = { swim: () => void };
+    type Bird = { fly: () => void };
+    type Human = { swim?: () => void; fly?: () => void };
+ 
+    function move(animal: Fish | Bird | Human) {
+        if ("swim" in animal) {
+            animal;
+            //(parameter) animal: Fish | Human
+        } else {
+            animal;
+            //(parameter) animal: Bird | Human
+        }
+    }
+
+Тип never используется для представления состояния, которое не должно существовать.
+Тип never может быть назначен любому типу, однако, ни один тип не может быть назначен never(кроме never самого себя).
+Это можно использовать в switch, чтобы убедиться, что все случаи обработаны.
+
+    type Shape = Circle | Square;
+ 
+    function getArea(shape: Shape) {
+        switch (shape.kind) {
+            case "circle":
+                return Math.PI * shape.radius ** 2;
+            case "square":
+                return shape.sideLength ** 2;
+            default:
+                const _exhaustiveCheck: never = shape;
+                return _exhaustiveCheck;
+        }
+    }
+}
+
+День 4
