@@ -121,3 +121,34 @@ Narrowing - уточнение типа, чтобы избежать ошибо�
 }
 
 День 4
+Функции в typescript
+    interface CallOrConstruct {
+        (n?: number): string; // function call signature
+        new (s: string): Date; // constructor signature
+    }
+Не обязательные параметры, 
+
+    function f(x?: number) {
+    // ...
+    }
+    f(); // OK
+    f(10); // OK
+
+Перезагрузка функций
+
+    function makeDate(timestamp: number): Date;
+    function makeDate(m: number, d: number, y: number): Date;
+    function makeDate(mOrTimestamp: number, d?: number, y?: number): Date {
+        if (d !== undefined && y !== undefined) {
+            return new Date(y, mOrTimestamp, d);
+        } else {
+            return new Date(mOrTimestamp);
+        }
+    }
+    const d1 = makeDate(12345678);
+    const d2 = makeDate(5, 5, 5);
+    const d3 = makeDate(1, 3);
+
+
+функций void  - функция, которая не возвращает значение
+Тип unknown представляет любое значение. Это похоже на anyтип, но безопаснее, поскольку недопустимо что-либо делать с unknown значением:
