@@ -111,4 +111,160 @@ useMutation - хук, который позволяет выполнять му�
     -loading - булево значение, указывающее, загружается ли мутация
     -error - объект, содержащий информацию об ошибке
     -reset 
-    
+
+День 5 
+Hasura Queries 
+Можно использовать фрагменты (fragments) для повторного использования части запроса
+    fragment articleFields on bigquery_articles {
+        id
+        title
+    }
+    query getArticles {
+        bigquery_articles {
+            ...articleFields
+        }
+        topTwoArticles: bigquery_articles(
+            order_by: {rating: desc},
+        limit: 2
+    ) {
+        ...articleFields
+    }
+    }
+
+Hasura Mutations
+
+insert_field - ставить несколько объектов одного типа в одну и ту же мутацию
+insert_field_one - ставить один объект в мутацию
+    mutation insert_single_article {
+        insert_article_one(
+            object: {
+                title: "Article 1",
+                content: "Sample article content",
+                author_id: 3
+            }
+        ) {
+            id
+            title
+        }
+    }
+
+с использованием переменных:
+
+    mutation insert_single_article($object: article_insert_input! ) {
+        insert_article_one(object: $object) {
+            id
+            title
+        }
+    }
+
+Вставьте объект вместе со связанными с ним объектами через объект-связь (object-relationship):
+
+One-to-one / One-to-many relationships
+    mutation insertData {
+        insert_authors
+            (objects: [
+                {
+                    name: "John",
+                    address: {
+                        data: {
+                            location: "San Francisco"
+                        }
+                    },
+                    articles: {
+                        data: [
+                            {
+                                title: "GraphQL Guide",
+                                content: "Let's see what we can do with GraphQL"
+                            },
+                            {
+                                title: "Authentication Guide",
+                                content: "Let's look at best practices for authentication"
+                            }
+                        ]
+                    }
+                }
+            ]
+        ) {
+            affected_rows
+            returning {
+                id
+                name
+                address_id
+                address {
+                    id
+                    location
+                }
+                articles {
+                    id
+                    title
+                    author_id
+                }
+            }
+        }
+    }
+
+
+Many-to-many relationships
+
+    mutation insertArticle {
+        insert_articles(objects: [
+            {
+                title: "How to make fajitas",
+                content: "Guide on making the best fajitas in the world",
+                author_id: 3,
+                article_tags: {
+                    data: [
+                        {
+                            tag: {
+                                data: {
+                                    label: "Recipes"
+                                },
+                                on_conflict: {
+                                    constraint: tags_label_key,
+                                    update_columns: [label]
+                                }
+                            }
+                        },
+                        {
+                            tag: {
+                                data: {
+                                    label: "Cooking"
+                                },
+                                on_conflict: {
+                                    constraint: tags_label_key,
+                                    update_columns: [label]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+        ) {
+            affected_rows
+            returning {
+                id
+                title
+                content
+                author_id
+                article_tags {
+                    tag {
+                        label
+                    }
+                }
+            }
+        }
+    } {
+        affected_rows
+        returning {
+            id
+            title
+            content
+            author_id
+            article_tags {
+                tag {
+                    label
+                }
+            }
+        }
+    }
