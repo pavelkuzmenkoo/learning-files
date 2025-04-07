@@ -302,3 +302,41 @@ delete_article_by_pk - удаление объекта по первичному
     ) {
         affected_rows
     }
+
+День 7
+
+Subscriptions Получайте обновления в режиме реального времени с вашего сервера GraphQL
+
+пример подписки 
+    const COMMENTS_SUBSCRIPTION: TypedDocumentNode<
+        OnCommentAddedSubscription,
+        OnCommentAddedSubscriptionVariables
+    > = gql`
+        subscription OnCommentAdded($postID: ID!) {
+            commentAdded(postID: $postID) {
+                id
+                content
+            }
+        }
+    `;
+
+    function LatestComment({ postID }: LatestCommentProps) {
+        const { data, loading } = useSubscription(
+            COMMENTS_SUBSCRIPTION,
+            { variables: { postID } }
+        );
+
+        return <h4>New comment: {!loading && data.commentAdded.content}</h4>;
+    }   
+
+useSubscription - хук, который позволяет подписаться на события в режиме реального времени
+    принимает 2 параметра:
+        - query - строка с запросом, 
+        - variables - объект с переменными
+    возвращает объект с data, loading, error    
+
+Hasura Subscriptions 
+
+Hasura позволяет подписаться на события в режиме реального времени, используя WebSockets.
+Live queries - позволяет получать обновления в режиме реального времени. Периодически опрашивают сервер на наличие изменений
+Streaming - позволяет получать обновления в режиме реального времени. Поддерживает постоянное соединение для мгновенной передачи изменений
